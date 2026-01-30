@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>📚 Book Summary & Review Generator</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            width: 700px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #4338ca;
+        }
+
+        .loading {
+            text-align: center;
+            margin-top: 15px;
+            font-style: italic;
+            color: #555;
+        }
+
+        .result {
+            white-space: pre-wrap;
+            margin-top: 25px;
+            padding: 15px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            border-left: 5px solid #4f46e5;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>📘 Générateur de résumé et avis de livre</h1>
+
+    <label>Titre du livre</label>
+    <input id="title" placeholder="Ex : L'Étranger">
+
+    <label>Auteur (optionnel)</label>
+    <input id="author" placeholder="Ex : Albert Camus">
+
+    <label>Description du livre</label>
+    <textarea id="description" rows="6"
+        placeholder="Résumé bref ou description du livre..."></textarea>
+
+    <button onclick="generate()">Générer le résumé et l’avis</button>
+
+    <div id="loading" class="loading" style="display:none;">
+        ⏳ Génération en cours...
+    </div>
+
+    <div id="result" class="result"></div>
+</div>
+
+<script>
+async function generate() {
+    const title = document.getElementById("title").value;
+    const author = document.getElementById("author").value;
+    const description = document.getElementById("description").value;
+    const resultDiv = document.getElementById("result");
+    const loading = document.getElementById("loading");
+
+    if (!title || !description) {
+        alert("⚠️ Le titre et la description sont obligatoires.");
+        return;
+    }
+
+    resultDiv.textContent = "";
+    loading.style.display = "block";
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, author, description })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            resultDiv.textContent = "❌ " + data.error;
+        } else {
+            resultDiv.textContent = data.generated_text;
+        }
+
+    } catch (error) {
+        resultDiv.textContent = "❌ Impossible de contacter le serveur.";
+    } finally {
+        loading.style.display = "none";
+    }
+}
+</script>
+
+</body>
+</html>
